@@ -81,16 +81,16 @@ int main(int argc, char **argv) {
 
 
     uint64_t *locs = malloc(nb_accesses * sizeof(uint64_t));
-    uint64_t start = lehmer64() % (sb.st_size - (nb_accesses + 1) * granularity);
+    uint64_t start = lehmer64() % (sb.st_size - (nb_accesses + 1) * granularity) / granularity * granularity;
     if (argc != 1) {
         puts("rand");
         for (size_t i = 0; i < nb_accesses; i++) {
-            locs[i] = lehmer64() % (sb.st_size - granularity);
+            locs[i] = lehmer64() % (sb.st_size - granularity) / granularity * granularity;
         }
     } else {
         puts("seq");
         for (size_t i = 0; i < nb_accesses; i++) {
-            locs[i] = (start + i * granularity) % (sb.st_size - granularity);
+            locs[i] = (start + i * granularity) % (sb.st_size - granularity) / granularity * granularity;
         }
     }
 
