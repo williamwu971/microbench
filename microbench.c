@@ -72,8 +72,8 @@ int main(int argc, char **argv) {
     memset(map, 0, sb.st_size);
 
     /* Allocate data to copy to the file */
-    char *page_data = aligned_alloc(PAGE_SIZE, granularity);
-    memset(page_data, lehmer64(), granularity);
+//    char *page_data = aligned_alloc(PAGE_SIZE, granularity);
+//    memset(page_data, lehmer64(), granularity);
 
     /*for(int i = 0; i < nb_accesses; i++) {
        memcpy(map[location], xxx, size);
@@ -98,6 +98,7 @@ int main(int argc, char **argv) {
     puts("begin");
 
     uint64_t sum = 0;
+    int set = (int) lehmer64();
 
     /* Benchmark N memcpy */
     declare_timer;
@@ -112,7 +113,8 @@ int main(int argc, char **argv) {
              * todo: questionable flush here
              */
 
-            pmem_memcpy_persist(&map[locs[i]], page_data, granularity);
+//            pmem_memcpy_persist(&map[locs[i]], page_data, granularity);
+            pmem_memset_persist(&map[locs[i]], set, granularity);
 //            memcpy(&map[locs[i]], page_data, granularity);
 //            asm volatile ("clwb (%0)"::"r"(&map[locs[i]]));
 //            asm volatile ("sfence":: : "memory");
