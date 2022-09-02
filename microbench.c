@@ -67,6 +67,8 @@ void start_perf() {
 
     chaser += sprintf(chaser, " > perf.data 2>&1 &");
 
+    printf("%s\n", buf);
+    exit(0);
 
     system(buf);
 }
@@ -78,6 +80,8 @@ void stop_perf() {
 
 
 int main(int argc, char **argv) {
+
+    start_perf();
 
     if (argc < 2) return 1;
 
