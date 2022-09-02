@@ -54,7 +54,7 @@ void start_perf() {
         );
 
         if (stick == num_of_sticks - 1) {
-            chaser += sprintf(chaser, " &", perf_fn);
+            chaser += sprintf(chaser, " &");
         } else {
             chaser += sprintf(chaser, ",");
         }
