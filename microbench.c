@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 
     long granularity = 256;      // granularity of accesses
     long nb_accesses = 30000000;   // nb ops
-    char *path = "/pmem0/masstree_obj";   // benched file
+    char *path = argv[1];   // benched file
 
     /* Open file */
     int fd = open(path, O_RDWR | O_CREAT | O_DIRECT, 0777);
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
 
     uint64_t *locs = malloc(nb_accesses * sizeof(uint64_t));
     uint64_t start = lehmer64() % (sb.st_size - (nb_accesses + 1) * granularity) / granularity * granularity;
-    if (argc != 1) {
+    if (argc != 2) {
         puts("rand");
         for (size_t i = 0; i < nb_accesses; i++) {
             locs[i] = lehmer64() % (sb.st_size - granularity) / granularity * granularity;
