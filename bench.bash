@@ -16,5 +16,5 @@ uncore_imc_5/unc_m_pmm_wpq_inserts/,\
 uncore_imc_6/unc_m_pmm_rpq_inserts/,\
 uncore_imc_6/unc_m_pmm_wpq_inserts/,\
 uncore_imc_7/unc_m_pmm_rpq_inserts/,\
-uncore_imc_7/unc_m_pmm_pq_inserts/ \
+uncore_imc_7/unc_m_pmm_wpq_inserts/ \
 $1 $2
