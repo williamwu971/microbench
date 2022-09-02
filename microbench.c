@@ -67,8 +67,6 @@ void start_perf() {
 
     chaser += sprintf(chaser, " > perf.data 2>&1 &");
 
-    printf("%s\n", buf);
-    exit(0);
 
     system(buf);
 }
@@ -81,7 +79,6 @@ void stop_perf() {
 
 int main(int argc, char **argv) {
 
-    start_perf();
 
     if (argc < 2) return 1;
 
@@ -143,7 +140,7 @@ int main(int argc, char **argv) {
 
     //  1,920,000,000
     //    117,316,372
-    start_perf();
+//    start_perf();
 
     puts("begin");
 
@@ -173,7 +170,7 @@ int main(int argc, char **argv) {
     }stop_timer("Doing %ld memcpy of %ld bytes (%f MB/s) sum %lu", nb_accesses, granularity,
                 bandwith(nb_accesses * granularity, elapsed), sum);
 
-    stop_perf();
+//    stop_perf();
 
     return 0;
 }
