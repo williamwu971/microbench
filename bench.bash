@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-/home/blepers/linux-huge/tools/perf/perf stat -e \
+/mnt/sdb/xiaoxiang/linux/tools/perf stat -e \
 uncore_imc_0/unc_m_pmm_rpq_inserts/,\
 uncore_imc_0/unc_m_pmm_wpq_inserts/,\
 uncore_imc_1/unc_m_pmm_rpq_inserts/,\
