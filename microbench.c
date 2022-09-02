@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 
     long granularity = 256;      // granularity of accesses
     long nb_accesses = 30000000;   // nb ops
-    char *path = "/pmem0/masstree_sb";   // benched file
+    char *path = "/pmem0/masstree_obj";   // benched file
 
     /* Open file */
     int fd = open(path, O_RDWR | O_CREAT | O_DIRECT, 0777);
