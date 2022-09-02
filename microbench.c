@@ -46,21 +46,19 @@ void start_perf() {
 
     for (int stick = 0; stick < num_of_sticks; stick++) {
 
+        for (int i = 0; i < 10; i++) {
+            chaser += sprintf(chaser, "uncore_imc_%d/event=0xe%d,umask=0x0/,", stick, i);
 
-        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_read/,", stick);
-//        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_read.scale/,", stick);
-        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_read.unit/,", stick);
-        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_write/,", stick);
-//        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_write.scale/,", stick);
-        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_write.unit/,", stick);
-        chaser += sprintf(chaser, "uncore_imc_%d/clockticks/", stick);
-
-        if (stick == num_of_sticks - 1) {
-            chaser += sprintf(chaser, " &");
-        } else {
-            chaser += sprintf(chaser, ",");
+            if (stick != num_of_sticks - 1 || i != 9) {
+                chaser += sprintf(chaser, ",");
+            }
         }
+
     }
+
+
+    chaser += sprintf(chaser, " &");
+
 
     system(buf);
 }
