@@ -48,10 +48,10 @@ void start_perf() {
 
 
         chaser += sprintf(chaser, "uncore_imc_%d/cas_count_read/,", stick);
-        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_read.scale/,", stick);
+//        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_read.scale/,", stick);
         chaser += sprintf(chaser, "uncore_imc_%d/cas_count_read.unit/,", stick);
         chaser += sprintf(chaser, "uncore_imc_%d/cas_count_write/,", stick);
-        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_write.scale/,", stick);
+//        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_write.scale/,", stick);
         chaser += sprintf(chaser, "uncore_imc_%d/cas_count_write.unit/,", stick);
         chaser += sprintf(chaser, "uncore_imc_%d/clockticks/", stick);
 
