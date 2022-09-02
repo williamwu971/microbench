@@ -35,6 +35,40 @@ static inline void clflush(char *data, int len, int front, int back) {
         asm volatile("sfence":: :"memory");
 }
 
+void start_perf() {
+
+
+    char buf[4096];
+    char *chaser = buf;
+
+    chaser += sprintf(chaser, "sudo /home/blepers/linux-huge/tools/perf/perf stat -e ");
+    int num_of_sticks = 8;
+
+    for (int stick = 0; stick < num_of_sticks; stick++) {
+
+
+        chaser += sprintf(chaser,
+                          "uncore_imc_%d/cas_count_read/,"
+                          "uncore_imc_%d/cas_count_write/",
+                          stick, stick
+        );
+
+        if (stick == num_of_sticks - 1) {
+            chaser += sprintf(chaser, " &", perf_fn);
+        } else {
+            chaser += sprintf(chaser, ",");
+        }
+    }
+
+    system(buf);
+}
+
+void stop_perf() {
+
+    system("sudo killall -s INT -w perf");
+}
+
+
 int main(int argc, char **argv) {
 
 
@@ -95,6 +129,8 @@ int main(int argc, char **argv) {
     }
 
 
+    start_perf();
+
     puts("begin");
 
     uint64_t sum = 0;
@@ -122,6 +158,8 @@ int main(int argc, char **argv) {
         }
     }stop_timer("Doing %ld memcpy of %ld bytes (%f MB/s) sum %lu", nb_accesses, granularity,
                 bandwith(nb_accesses * granularity, elapsed), sum);
+
+    stop_perf();
 
     return 0;
 }
