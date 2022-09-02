@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
 
     //  1,920,000,000
     //    117,316,372
-//    start_perf();
+    start_perf();
 
     puts("begin");
 
@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
     }stop_timer("Doing %ld memcpy of %ld bytes (%f MB/s) sum %lu", nb_accesses, granularity,
                 bandwith(nb_accesses * granularity, elapsed), sum);
 
-//    stop_perf();
+    stop_perf();
 
     return 0;
 }
