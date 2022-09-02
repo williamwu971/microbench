@@ -71,6 +71,7 @@ void stop_perf() {
 
 int main(int argc, char **argv) {
 
+    if (argc < 2) return 1;
 
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
