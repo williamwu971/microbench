@@ -57,7 +57,7 @@ void start_perf() {
     }
 
 
-    chaser += sprintf(chaser, " &");
+    chaser += sprintf(chaser, " > perf.data 2>&1 &");
 
 
     system(buf);
