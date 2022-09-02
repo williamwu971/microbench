@@ -46,13 +46,21 @@ void start_perf() {
 
     for (int stick = 0; stick < num_of_sticks; stick++) {
 
-        for (int i = 0; i < 10; i++) {
-            chaser += sprintf(chaser, "uncore_imc_%d/event=0xe%d,umask=0x0/", stick, i);
+        chaser += sprintf(chaser, "uncore_imc_%d/event=0x4,umask=0xC/,", stick);
+        chaser += sprintf(chaser, "uncore_imc_%d/event=0x4,umask=0x3/", stick);
 
-            if (stick != num_of_sticks - 1 || i != 9) {
-                chaser += sprintf(chaser, ",");
-            }
+        if (stick != num_of_sticks - 1) {
+            chaser += sprintf(chaser, ",");
         }
+
+//        for (int i = 0; i < 10; i++) {
+////            chaser += sprintf(chaser, "uncore_imc_%d/event=0xe%d,umask=0x0/", stick, i);
+//            chaser += sprintf(chaser, "uncore_imc_%d/event=0xe%d,umask=0x0/", stick, i);
+//
+//            if (stick != num_of_sticks - 1 || i != 9) {
+//                chaser += sprintf(chaser, ",");
+//            }
+//        }
 
     }
 
@@ -129,7 +137,8 @@ int main(int argc, char **argv) {
         }
     }
 
-
+    //  1,920,000,000
+    //    117,316,372
     start_perf();
 
     puts("begin");
