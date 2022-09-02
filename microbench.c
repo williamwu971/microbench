@@ -38,7 +38,7 @@ static inline void clflush(char *data, int len, int front, int back) {
 void start_perf() {
 
 
-    char buf[4096];
+    char buf[10240];
     char *chaser = buf;
 
     chaser += sprintf(chaser, "sudo /home/blepers/linux-huge/tools/perf/perf stat -e ");
@@ -47,8 +47,13 @@ void start_perf() {
     for (int stick = 0; stick < num_of_sticks; stick++) {
 
 
-//        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_read/,", stick);
-        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_write/", stick);
+        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_read/,", stick);
+        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_read.scale/,", stick);
+        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_read.unit/,", stick);
+        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_write/,", stick);
+        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_write.scale/,", stick);
+        chaser += sprintf(chaser, "uncore_imc_%d/cas_count_write.unit/,", stick);
+        chaser += sprintf(chaser, "uncore_imc_%d/clockticks/,", stick);
 
         if (stick == num_of_sticks - 1) {
             chaser += sprintf(chaser, " &");
@@ -127,7 +132,7 @@ int main(int argc, char **argv) {
     }
 
 
-//    start_perf();
+    start_perf();
 
     puts("begin");
 
@@ -157,7 +162,7 @@ int main(int argc, char **argv) {
     }stop_timer("Doing %ld memcpy of %ld bytes (%f MB/s) sum %lu", nb_accesses, granularity,
                 bandwith(nb_accesses * granularity, elapsed), sum);
 
-//    stop_perf();
+    stop_perf();
 
     return 0;
 }
