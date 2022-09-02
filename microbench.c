@@ -46,8 +46,8 @@ void start_perf() {
 
     for (int stick = 0; stick < num_of_sticks; stick++) {
 
-        chaser += sprintf(chaser, "uncore_imc_%d/event=0x4,umask=0xC/,", stick);
-        chaser += sprintf(chaser, "uncore_imc_%d/event=0x4,umask=0x3/", stick);
+        chaser += sprintf(chaser, "uncore_imc_%d/unc_m_pmm_rpq_inserts/,", stick);
+        chaser += sprintf(chaser, "uncore_imc_%d/unc_m_pmm_wpq_inserts/", stick);
 
         if (stick != num_of_sticks - 1) {
             chaser += sprintf(chaser, ",");
