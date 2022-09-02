@@ -17,4 +17,4 @@ uncore_imc_6/event=0xE3/,\
 uncore_imc_6/event=0xE3/,\
 uncore_imc_7/event=0xE3/,\
 uncore_imc_7/event=0xE3/ \
-ls
+$1
