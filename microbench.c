@@ -39,6 +39,7 @@ void start_perf() {
 
 
     system("sudo /mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory >/dev/null 2>&1 &");
+    sleep(1);
 }
 
 void stop_perf() {
