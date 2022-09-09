@@ -37,7 +37,7 @@ static inline void clflush(char *data, int len, int front, int back) {
 
 void start_perf() {
 
-
+    remove("/mnt/sdb/xiaoxiang/pcm.txt");
     system("sudo /mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory >/dev/null 2>&1 &");
     sleep(1);
 }
@@ -45,6 +45,7 @@ void start_perf() {
 void stop_perf() {
 
     system("sudo pkill --signal SIGHUP -f pcm-memory");
+    sleep(1);
 }
 
 void show_perf() {
