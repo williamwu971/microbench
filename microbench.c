@@ -38,42 +38,23 @@ static inline void clflush(char *data, int len, int front, int back) {
 void start_perf() {
 
 
-    char buf[10240];
-    char *chaser = buf;
-
-    chaser += sprintf(chaser, "sudo /home/blepers/linux-huge/tools/perf/perf stat -e ");
-    int num_of_sticks = 8;
-
-    for (int stick = 0; stick < num_of_sticks; stick++) {
-
-        chaser += sprintf(chaser, "uncore_imc_%d/unc_m_pmm_rpq_inserts/,", stick);
-        chaser += sprintf(chaser, "uncore_imc_%d/unc_m_pmm_wpq_inserts/", stick);
-
-        if (stick != num_of_sticks - 1) {
-            chaser += sprintf(chaser, ",");
-        }
-
-//        for (int i = 0; i < 10; i++) {
-////            chaser += sprintf(chaser, "uncore_imc_%d/event=0xe%d,umask=0x0/", stick, i);
-//            chaser += sprintf(chaser, "uncore_imc_%d/event=0xe%d,umask=0x0/", stick, i);
-//
-//            if (stick != num_of_sticks - 1 || i != 9) {
-//                chaser += sprintf(chaser, ",");
-//            }
-//        }
-
-    }
-
-
-    chaser += sprintf(chaser, " > perf.data 2>&1 &");
-
-
-    system(buf);
+    system("sudo /mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory >/dev/null 2>&1 &");
 }
 
 void stop_perf() {
 
-    system("sudo killall -s INT -w perf");
+    system("sudo pkill --signal SIGHUP -f pcm-memory");
+}
+
+void show_perf() {
+    FILE *file = fopen("/mnt/sdb/xiaoxiang/pcm.txt", "r");
+
+
+    char buf[256];
+    while (fgets(buf, 256, file) != NULL) {
+        printf("%s", buf);
+    }
+
 }
 
 
@@ -116,8 +97,8 @@ int main(int argc, char **argv) {
 //    memset(map, 0, sb.st_size);
 
     /* Allocate data to copy to the file */
-//    char *page_data = aligned_alloc(PAGE_SIZE, granularity);
-//    memset(page_data, lehmer64(), granularity);
+    char *page_data = aligned_alloc(PAGE_SIZE, granularity);
+    memset(page_data, lehmer64(), granularity);
 
     /*for(int i = 0; i < nb_accesses; i++) {
        memcpy(map[location], xxx, size);
@@ -140,12 +121,11 @@ int main(int argc, char **argv) {
 
     //  1,920,000,000
     //    117,697,700
-//    start_perf();
-
     puts("begin");
 
+    start_perf();
+
     uint64_t sum = 0;
-    int set = (int) lehmer64();
 
     /* Benchmark N memcpy */
     declare_timer;
@@ -160,8 +140,8 @@ int main(int argc, char **argv) {
              * todo: questionable flush here
              */
 
-//            pmem_memcpy_persist(&map[locs[i]], page_data, granularity);
-            pmem_memset_persist(&map[locs[i]], set, granularity);
+            pmem_memcpy_persist(&map[locs[i]], page_data, granularity);
+//            pmem_memset_persist(&map[locs[i]], set, granularity);
 //            memcpy(&map[locs[i]], page_data, granularity);
 //            asm volatile ("clwb (%0)"::"r"(&map[locs[i]]));
 //            asm volatile ("sfence":: : "memory");
@@ -170,7 +150,8 @@ int main(int argc, char **argv) {
     }stop_timer("Doing %ld memcpy of %ld bytes (%f MB/s) sum %lu", nb_accesses, granularity,
                 bandwith(nb_accesses * granularity, elapsed), sum);
 
-//    stop_perf();
+    stop_perf();
+    show_perf();
 
     return 0;
 }
