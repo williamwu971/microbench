@@ -175,14 +175,16 @@ int main(int argc, char **argv) {
     uint64_t *locs = malloc(nb_accesses * sizeof(uint64_t));
     uint64_t start = lehmer64() % (mapped_len - (nb_accesses + 1) * granularity) / granularity * granularity;
     if (argc != 2) {
+        puts("seq");
+        start = 0;
+        for (size_t i = 0; i < nb_accesses; i++) {
+            locs[i] = (start + i * granularity) % (mapped_len - granularity) / granularity * granularity;
+        }
+
+    } else {
         puts("rand");
         for (size_t i = 0; i < nb_accesses; i++) {
             locs[i] = lehmer64() % (mapped_len - granularity) / granularity * granularity;
-        }
-    } else {
-        puts("seq");
-        for (size_t i = 0; i < nb_accesses; i++) {
-            locs[i] = (start + i * granularity) % (mapped_len - granularity) / granularity * granularity;
         }
     }
 
