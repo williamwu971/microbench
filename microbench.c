@@ -132,13 +132,10 @@ void log_print_pmem_bandwidth(const char *perf_fn, double elapsed) {
 
 int main(int argc, char **argv) {
 
-
-    if (argc < 2) return 1;
+    (void) argv;
 
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
-
-    /* Set affinity mask to include CPUs 0 to 7 */
 
     CPU_ZERO(&cpuset);
     CPU_SET(7, &cpuset);
@@ -149,24 +146,22 @@ int main(int argc, char **argv) {
 
     long granularity = 256;      // granularity of accesses
     long nb_accesses = 30000000;   // nb ops
-    char *path = argv[1];   // benched file
 
-    /* Open file */
-    int fd = open(path, O_RDWR | O_CREAT | O_DIRECT, 0777);
-    if (fd == -1)
-        die("Cannot open %s\n", path);
 
-    /* Find size */
-    struct stat sb;
-    fstat(fd, &sb);
-    printf("# Size of file being benched: %luMB\n", sb.st_size / 1024 / 1024);
 
     /* Mmap file */
-    char *map = pmem_map_file(path, 0, 0, 0777, NULL, NULL);
-    if (!pmem_is_pmem(map, sb.st_size))
+    size_t desired_len = 1024 * 1024 * 1024;
+    size_t mapped_len;
+    int is_pmem;
+    char *map = pmem_map_file("/pmem0/microbench_pool", desired_len, PMEM_FILE_CREATE | PMEM_FILE_EXCL, 00666,
+                              &mapped_len, &is_pmem);
+    if (!is_pmem || mapped_len != desired_len)
         die("File is not in pmem?!");
-//    char *map = mmap(NULL, sb.st_size, PROT_READ | PROT_WRITE, MAP_SYNC | MAP_SHARED_VALIDATE, fd, 0);
-//    memset(map, 0, sb.st_size);
+
+    /* Find size */
+    printf("# Size of file being benched: %luMB\n", mapped_len / 1024 / 1024);
+
+    memset(map, 0, mapped_len);
 
     /* Allocate data to copy to the file */
     char *page_data = aligned_alloc(PAGE_SIZE, granularity);
@@ -178,21 +173,19 @@ int main(int argc, char **argv) {
 
 
     uint64_t *locs = malloc(nb_accesses * sizeof(uint64_t));
-    uint64_t start = lehmer64() % (sb.st_size - (nb_accesses + 1) * granularity) / granularity * granularity;
+    uint64_t start = lehmer64() % (mapped_len - (nb_accesses + 1) * granularity) / granularity * granularity;
     if (argc != 2) {
         puts("rand");
         for (size_t i = 0; i < nb_accesses; i++) {
-            locs[i] = lehmer64() % (sb.st_size - granularity) / granularity * granularity;
+            locs[i] = lehmer64() % (mapped_len - granularity) / granularity * granularity;
         }
     } else {
         puts("seq");
         for (size_t i = 0; i < nb_accesses; i++) {
-            locs[i] = (start + i * granularity) % (sb.st_size - granularity) / granularity * granularity;
+            locs[i] = (start + i * granularity) % (mapped_len - granularity) / granularity * granularity;
         }
     }
 
-    //  1,920,000,000
-    //    117,697,700
     puts("begin");
 
     log_start_perf("microbench.perf");
@@ -205,8 +198,6 @@ int main(int argc, char **argv) {
     {
 
         for (size_t i = 0; i < nb_accesses; i++) {
-//            uint64_t loc = lehmer64() % (sb.st_size - granularity);
-//            uint64_t loc = start + i * granularity;
 
             /**
              * todo: questionable flush here
