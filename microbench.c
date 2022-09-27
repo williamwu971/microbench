@@ -35,27 +35,97 @@ static inline void clflush(char *data, int len, int front, int back) {
         asm volatile("sfence":: :"memory");
 }
 
-void start_perf() {
+int log_start_perf(const char *perf_fn) {
+
+    (void) perf_fn;
+
+    char command[2048];
+
+    int cores = sysconf(_SC_NPROCESSORS_ONLN);
+
+    sprintf(command,
+            "sudo taskset -c %d-%d /home/blepers/linux-huge/tools/perf/perf record --call-graph dwarf -F 100 -p %d -o %s -g >> perf.out 2>&1 &",
+            cores * 3 / 4, cores - 1, getpid(), perf_fn);
+    int res = system(command);
+
+    char real_command[4096];
 
     remove("/mnt/sdb/xiaoxiang/pcm.txt");
-    system("sudo /mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory >/dev/null 2>&1 &");
+    sprintf(real_command, "sudo taskset -c %d-%d /mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory -all >/dev/null 2>&1 &",
+            cores * 3 / 4, cores - 1);
+
+    res &= system(real_command);
     sleep(1);
+
+    return res;
 }
 
-void stop_perf() {
+int log_stop_perf() {
 
-    system("sudo pkill --signal SIGHUP -f pcm-memory");
+    char command[1024];
+    sprintf(command, "sudo killall -s INT -w perf");
+    sprintf(command, "sudo killall -s INT perf");
+
+    int res = system(command);
+
+    sprintf(command, "sudo pkill --signal SIGHUP -f pcm-memory");
+    res &= system(command);
+
     sleep(1);
+    return res;
 }
 
-void show_perf() {
-    FILE *file = fopen("/mnt/sdb/xiaoxiang/pcm.txt", "r");
 
+void log_print_pmem_bandwidth(const char *perf_fn, double elapsed) {
 
-    char buf[256];
-    while (fgets(buf, 256, file) != NULL) {
-        printf("%s", buf);
+    (void) perf_fn;
+
+    uint64_t read = 0;
+    uint64_t write = 0;
+
+    int scanned_channel = 0;
+
+    while (scanned_channel < 12) {
+        FILE *file = fopen("/mnt/sdb/xiaoxiang/pcm.txt", "r");
+        read = 0;
+        write = 0;
+
+        char buffer[256];
+        int is_first_line = 1;
+        while (fgets(buffer, 256, file) != NULL) {
+            if (is_first_line) {
+                is_first_line = 0;
+                continue;
+            }
+            uint64_t skt, channel, pmmReads, pmmWrites, elapsedTime;
+            sscanf(buffer, "%lu %lu %lu %lu %lu", &skt, &channel, &pmmReads, &pmmWrites, &elapsedTime);
+            scanned_channel++;
+            read += pmmReads;
+            write += pmmWrites;
+        }
     }
+
+
+    double read_gb = (double) read / 1024.0f / 1024.0f / 1024.0f;
+    double write_gb = (double) write / 1024.0f / 1024.0f / 1024.0f;
+
+    double read_bw = read_gb / elapsed;
+    double write_bw = write_gb / elapsed;
+
+
+    printf("\n");
+
+    printf("read: ");
+    printf("%.2fgb ", read_gb);
+    printf("%.2fgb/s ", read_bw);
+
+    printf("write: ");
+    printf("%.2fgb ", write_gb);
+    printf("%.2fgb/s ", write_bw);
+
+    printf("elapsed: %.2f ", elapsed);
+
+    printf("\n");
 
 }
 
@@ -125,7 +195,7 @@ int main(int argc, char **argv) {
     //    117,697,700
     puts("begin");
 
-    start_perf();
+    log_start_perf("microbench.perf");
 
     uint64_t sum = 0;
 
@@ -152,8 +222,8 @@ int main(int argc, char **argv) {
     }stop_timer("Doing %ld memcpy of %ld bytes (%f MB/s) sum %lu", nb_accesses, granularity,
                 bandwith(nb_accesses * granularity, elapsed), sum);
 
-    stop_perf();
-    show_perf();
+    log_stop_perf();
+    log_print_pmem_bandwidth("microbench.perf", (double) elapsed / 1000000.0);
 
     return 0;
 }
