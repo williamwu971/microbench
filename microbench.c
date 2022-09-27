@@ -132,7 +132,7 @@ void log_print_pmem_bandwidth(const char *perf_fn, double elapsed) {
 
 int main(int argc, char **argv) {
 
-    (void) argv;
+    if (argc != 4) return 1;
 
     cpu_set_t cpuset;
     pthread_t thread = pthread_self();
@@ -144,8 +144,9 @@ int main(int argc, char **argv) {
 
     init_seed();
 
-    long granularity = 256;      // granularity of accesses
-    long nb_accesses = 30000000;   // nb ops
+    long nb_accesses = strtol(argv[1], NULL, 10);   // nb ops
+    long granularity = strtol(argv[2], NULL, 10);      // granularity of accesses
+
 
 
 
@@ -174,7 +175,7 @@ int main(int argc, char **argv) {
 
     uint64_t *locs = malloc(nb_accesses * sizeof(uint64_t));
     uint64_t start = lehmer64() % (mapped_len - (nb_accesses + 1) * granularity) / granularity * granularity;
-    if (argc != 2) {
+    if (strcmp(argv[3], "seq") == 0) {
         puts("seq");
         start = 0;
         for (size_t i = 0; i < nb_accesses; i++) {
