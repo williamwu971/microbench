@@ -19,7 +19,8 @@ void *thread(void *arg) {
     struct args a = *(struct args *) arg;
 
     for (; a.len > GNL; a.len -= GNL) {
-        pmem_memcpy_persist(a.loc, a.buf, GNL);
+        memcpy(a.loc, a.buf, GNL);
+        pmem_persist(a.loc, GNL);
         a.loc += GNL;
     }
 
