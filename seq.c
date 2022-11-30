@@ -24,7 +24,7 @@ void *thread(void *arg) {
         if (seq) {
             indexes[i] = i * GNL;
         } else {
-            indexes[i] = (int) (rand() % (a.len - GNL)) / 256 * 256;
+            indexes[i] = (int) (rand() % (a.len - GNL)) / GNL * GNL;
         }
     }
 
