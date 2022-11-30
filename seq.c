@@ -13,23 +13,42 @@ struct args {
     char buf[GNL];
 };
 
+int seq = 1;
 
 void *thread(void *arg) {
 
     struct args a = *(struct args *) arg;
 
-    for (; a.len > GNL; a.len -= GNL) {
-        memcpy(a.loc, a.buf, GNL);
-        pmem_persist(a.loc, GNL);
-        a.loc += GNL;a
+    int *indexes = malloc(sizeof(int) * (a.len / GNL));
+    for (int i = 0; i < a.len / GNL; i++) {
+        if (seq) {
+            indexes[i] = i * GNL;
+        } else {
+            indexes[i] = rand() % (a.len - GNL);
+        }
     }
 
-    return NULL;
+    declare_timer
+    start_timer
+
+    for (int i = 0; i < a.len / GNL; i++) {
+        memcpy(a.loc + indexes[i], a.buf, GNL);
+        pmem_persist(a.loc, GNL);
+    }stop_timer();
+
+
+    return (void *) elapsed;
 }
 
 int main(int argc, char **argv) {
 
-    if (argc != 2)return 1;
+    if (argc < 2)return 1;
+    if (argc > 2) {
+        seq = 0;
+        puts("rand");
+    } else {
+        puts("seq");
+    }
 
     size_t mapped_len;
     int is_pmem;
@@ -57,19 +76,22 @@ int main(int argc, char **argv) {
     }
 
     puts("begin");
-    declare_timer
-    start_timer
+
 
     for (int i = 0; i < NUM_THREADS; i++) {
         pthread_create(threads + i, NULL, thread, threads_args + i);
     }
+
+    uint64_t elapsed = 0;
+
     for (int i = 0; i < NUM_THREADS; i++) {
-        pthread_join(threads[i], NULL);
+        uint64_t e;
+        pthread_join(threads[i], (void **) &e);
+        elapsed += e;
     }
 
 
-    stop_timer("elapsed %.2fms", elapsed / 1000.);
-
+    printf("e: %.2fms\n", (double) elapsed / NUM_THREADS / 1000.);
 
     return 0;
 }

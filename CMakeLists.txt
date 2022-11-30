@@ -7,4 +7,4 @@ include_directories(.)
 
 add_executable(microbench
         microbench.c
-        microbench.h eADR.c)
+        microbench.h eADR.c seq.c)
