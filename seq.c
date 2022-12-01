@@ -32,8 +32,8 @@ void *thread(void *arg) {
     start_timer
 
     for (int i = 0; i < a.len / GNL; i++) {
-        memcpy(a.loc + indexes[i], a.buf, GNL);
-        pmem_persist(a.loc, GNL);
+        pmem_memcpy_persist(a.loc + indexes[i], a.buf, GNL);
+//        pmem_persist(a.loc, GNL);
     }stop_timer();
 
 

@@ -21,7 +21,7 @@ void *thread(void *arg) {
     for (; a.len > GNL; a.len -= GNL) {
         memcpy(a.loc, a.buf, GNL);
         pmem_persist(a.loc, GNL);
-        a.loc += GNL;a
+        a.loc += GNL;
     }
 
     return NULL;
