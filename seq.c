@@ -28,13 +28,21 @@ void *thread(void *arg) {
         }
     }
 
+    uint64_t not_aligned = 0;
+
     declare_timer
     start_timer
 
     for (int i = 0; i < a.len / GNL; i++) {
+
+        if (a.loc + indexes[i] % 256) {
+            not_aligned++;
+        }
+
+
         pmem_memcpy_persist(a.loc + indexes[i], a.buf, GNL);
 //        pmem_persist(a.loc, GNL);
-    }stop_timer();
+    }stop_timer("not A: %lu", not_aligned);
 
 
     return (void *) elapsed;
@@ -78,7 +86,8 @@ int main(int argc, char **argv) {
     puts("begin");
 
     char sys_command[1024];
-    sprintf(sys_command, "/home/blepers/linux-huge/tools/perf/perf stat -e uncore_imc/event=0xe7/ -e uncore_imc/event=0xe3/ &");
+    sprintf(sys_command,
+            "/home/blepers/linux-huge/tools/perf/perf stat -e uncore_imc/event=0xe7/ -e uncore_imc/event=0xe3/ &");
     system(sys_command);
 
 
