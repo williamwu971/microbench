@@ -77,6 +77,10 @@ int main(int argc, char **argv) {
 
     puts("begin");
 
+    char sys_command[1024];
+    sprintf(sys_command, "perf stat -e uncore_imc/event=0xe7/ -e uncore_imc/event=0xe3/ &");
+    system(sys_command);
+
 
     for (int i = 0; i < NUM_THREADS; i++) {
         pthread_create(threads + i, NULL, thread, threads_args + i);
@@ -89,6 +93,8 @@ int main(int argc, char **argv) {
         pthread_join(threads[i], (void **) &e);
         elapsed += e;
     }
+
+    system("killall -s INT perf");
 
 
     printf("e: %.2fms\n", (double) elapsed / NUM_THREADS / 1000.);
