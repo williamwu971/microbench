@@ -5,7 +5,7 @@
 #include "microbench.h"
 
 #define GNL 256
-#define NUM_THREADS 19
+#define NUM_THREADS 16
 
 struct args {
     char *loc;
