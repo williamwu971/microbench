@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
     puts("begin");
 
     char sys_command[1024];
-    sprintf(sys_command, "perf stat -e uncore_imc/event=0xe7/ -e uncore_imc/event=0xe3/ &");
+    sprintf(sys_command, "/home/blepers/linux-huge/tools/perf/perf stat -e uncore_imc/event=0xe7/ -e uncore_imc/event=0xe3/ &");
     system(sys_command);
 
 
