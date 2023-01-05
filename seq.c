@@ -44,8 +44,10 @@ void log_print_pmem_bandwidth(double elapsed) {
                 is_first_line = 0;
                 continue;
             }
-            uint64_t skt, channel, pmmReads, pmmWrites, elapsedTime;
-            sscanf(buffer, "%lu %lu %lu %lu %lu", &skt, &channel, &pmmReads, &pmmWrites, &elapsedTime);
+            uint64_t skt, channel, pmmReads, pmmWrites, elapsedTime, dramReads, dramWrites;
+            sscanf(buffer, "%lu %lu %lu %lu %lu %lu %lu",
+                   &skt, &channel, &pmmReads, &pmmWrites, &elapsedTime, &dramReads, &dramWrites
+            );
             scanned_channel++;
             read += pmmReads;
             write += pmmWrites;
