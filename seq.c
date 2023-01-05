@@ -74,6 +74,9 @@ void log_print_pmem_bandwidth(double elapsed) {
 
     printf("\n");
 
+    FILE *f = fopen("seq.csv", "a");
+    fprintf(f, "%dB,%.2f,%.2f,%.2f,%.2f,%.2f,\n", GNL, read_gb, read_bw, write_gb, write_bw, elapsed);
+
 }
 
 void *thread(void *arg) {
