@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
     /* Find size */
     printf("#+-+- Size of file being benched: %luMB gran %d\n", mapped_len / 1024 / 1024, GNL);
 
-    memset(map, 0, mapped_len);
+
     for (size_t i = 0; i < mapped_len; i += 4096) {
         map[i] = 0;
     }
