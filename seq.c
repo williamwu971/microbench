@@ -84,6 +84,11 @@ void *thread(void *arg) {
     int granularity = GNL;
     char *ptr = (char *) arg;
 
+    if (((uint64_t) ptr) % 256 != 0) {
+        puts("error");
+        exit(1);
+    }
+
     void *buf = malloc(granularity);
     memset(buf, 0xdeadbeef, granularity);
 
