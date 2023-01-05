@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 
     if (argc != 3)return 1;
     GNL = atoi(argv[1]);
-    int NUM_THREADS = atoi(argv[2]);
+    uint64_t NUM_THREADS = (uint64_t) atoi(argv[2]);
 
     size_t mapped_len;
     int is_pmem;
