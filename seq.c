@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
         die("File is not in pmem?!");
 
     /* Find size */
-    printf("#+-+- Size of file being benched: %luMB\n", mapped_len / 1024 / 1024);
+    printf("#+-+- Size of file being benched: %luMB gran %d\n", mapped_len / 1024 / 1024, GNL);
 
     memset(map, 0, mapped_len);
     for (size_t i = 0; i < mapped_len; i += 4096) {
