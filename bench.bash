@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 total_sizes=($(seq 48 16 1024))
+gcc seq.c || exit
 
 for t in "${total_sizes[@]}"; do
-  echo $t
+  ./a.out "$t"
 done
 
 #/mnt/sdb/xiaoxiang/linux/tools/perf stat -e \
