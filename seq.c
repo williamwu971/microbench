@@ -4,63 +4,106 @@
 
 #include "microbench.h"
 
-#define GNL 256
-#define NUM_THREADS 16
+int GNL = 0;
+#define NUM_THREADS 19
 
-struct args {
-    char *loc;
-    size_t len;
-    char buf[GNL];
-};
+int log_start_perf() {
 
-int seq = 1;
+    remove("/mnt/sdb/xiaoxiang/pcm.txt");
 
-void *thread(void *arg) {
+    int res = system("sudo /mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory -all >/dev/null 2>&1 &");
+    sleep(1);
 
-    struct args a = *(struct args *) arg;
+    return res;
+}
 
-    int *indexes = malloc(sizeof(int) * (a.len / GNL));
-    for (int i = 0; i < a.len / GNL; i++) {
-        if (seq) {
-            indexes[i] = i * GNL;
-        } else {
-            indexes[i] = (int) (rand() % (a.len - GNL)) / GNL * GNL;
+int log_stop_perf() {
+
+    int res = system("sudo pkill --signal SIGHUP -f pcm-memory");
+    sleep(1);
+
+    return res;
+}
+
+void log_print_pmem_bandwidth(double elapsed) {
+
+    uint64_t read = 0;
+    uint64_t write = 0;
+
+    int scanned_channel = 0;
+
+    while (scanned_channel < 12) {
+        FILE *file = fopen("/mnt/sdb/xiaoxiang/pcm.txt", "r");
+        read = 0;
+        write = 0;
+
+        char buffer[256];
+        int is_first_line = 1;
+        while (fgets(buffer, 256, file) != NULL) {
+            if (is_first_line) {
+                is_first_line = 0;
+                continue;
+            }
+            uint64_t skt, channel, pmmReads, pmmWrites, elapsedTime;
+            sscanf(buffer, "%lu %lu %lu %lu %lu", &skt, &channel, &pmmReads, &pmmWrites, &elapsedTime);
+            scanned_channel++;
+            read += pmmReads;
+            write += pmmWrites;
         }
     }
 
-    uint64_t not_aligned = 0;
 
-    declare_timer
-    start_timer
+    double read_gb = (double) read / 1024.0f / 1024.0f / 1024.0f;
+    double write_gb = (double) write / 1024.0f / 1024.0f / 1024.0f;
 
-    for (int i = 0; i < a.len / GNL; i++) {
-
-        if (a.loc + indexes[i] % 256) {
-            not_aligned++;
-        }
+    double read_bw = read_gb / elapsed;
+    double write_bw = write_gb / elapsed;
 
 
-        pmem_memcpy_persist(a.loc + indexes[i], a.buf, GNL);
-//        pmem_persist(a.loc, GNL);
-    }stop_timer("not A: %lu", not_aligned);
+    printf("\n");
+
+    printf("read: ");
+    printf("%.2fgb ", read_gb);
+    printf("%.2fgb/s ", read_bw);
+
+    printf("write: ");
+    printf("%.2fgb ", write_gb);
+    printf("%.2fgb/s ", write_bw);
+
+    printf("elapsed: %.2f ", elapsed);
+
+    printf("\n");
+
+}
+
+void *thread(void *arg) {
+
+    int granularity = GNL;
+    char *ptr = (char *) arg;
+
+    void *buf = malloc(granularity);
+    memset(buf, 0xdeadbeef, granularity);
+
+    for (int i = 0; i < 1073741824; i += granularity, ptr += granularity) {
+
+        memcpy(ptr, buf, granularity);
+        pmem_persist(ptr, granularity);
+    }
 
 
-    return (void *) elapsed;
+    return NULL;
 }
 
 int main(int argc, char **argv) {
 
-    if (argc < 2)return 1;
-    if (argc > 2) {
-        seq = 0;
-        puts("rand");
-    } else {
-        puts("seq");
-    }
+    if (argc != 2)return 1;
+    GNL = atoi(argv[1]);
 
     size_t mapped_len;
     int is_pmem;
-    char *map = pmem_map_file(argv[1], 0, 0, 0, &mapped_len, &is_pmem);
+    char *map = pmem_map_file("/pmem0/microbench", 20401094656,
+                              PMEM_FILE_CREATE | PMEM_FILE_EXCL,
+                              00666, &mapped_len, &is_pmem);
     if (!is_pmem)
         die("File is not in pmem?!");
 
@@ -68,45 +111,32 @@ int main(int argc, char **argv) {
     printf("# Size of file being benched: %luMB\n", mapped_len / 1024 / 1024);
 
     memset(map, 0, mapped_len);
-    srand(time(NULL));
+    for (size_t i = 0; i < mapped_len; i += 4096) {
+        map[i] = 0;
+    }
 
 
     pthread_t *threads = malloc(sizeof(pthread_t) * NUM_THREADS);
-    struct args *threads_args = malloc(sizeof(struct args) * NUM_THREADS);
-
-    for (int i = 0; i < NUM_THREADS; i++) {
-        threads_args[i].loc = map + (mapped_len / NUM_THREADS * i);
-        threads_args[i].len = mapped_len / NUM_THREADS;
-
-        for (int j = 0; j < GNL; j++) {
-            threads_args[i].buf[j] = rand();
-        }
-    }
 
     puts("begin");
+    log_start_perf();
 
-    char sys_command[1024];
-    sprintf(sys_command,
-            "/home/blepers/linux-huge/tools/perf/perf stat -e uncore_imc/event=0xe7/ -e uncore_imc/event=0xe3/ &");
-    system(sys_command);
+    declare_timer
+    start_timer
+
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_create(threads + i, NULL, thread, map + i * 1073741824);
+    }
 
 
     for (int i = 0; i < NUM_THREADS; i++) {
-        pthread_create(threads + i, NULL, thread, threads_args + i);
+        pthread_join(threads[i], NULL);
     }
 
-    uint64_t elapsed = 0;
+    stop_timer();
 
-    for (int i = 0; i < NUM_THREADS; i++) {
-        uint64_t e;
-        pthread_join(threads[i], (void **) &e);
-        elapsed += e;
-    }
-
-    system("killall -s INT perf");
-
-
-    printf("e: %.2fms\n", (double) elapsed / NUM_THREADS / 1000.);
+    log_stop_perf();
+    log_print_pmem_bandwidth((double) elapsed / 1000000.0);
 
     return 0;
 }
