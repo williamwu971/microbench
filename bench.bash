@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 total_sizes=($(seq 48 16 1024))
-gcc seq.c -pthread || exit
+gcc seq.c -pthread -lpmem || exit
 
 for t in "${total_sizes[@]}"; do
   ./a.out "$t"
