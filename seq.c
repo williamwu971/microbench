@@ -87,7 +87,7 @@ void *thread(void *arg) {
     void *buf = malloc(granularity);
     memset(buf, 0xdeadbeef, granularity);
 
-    for (int i = 0; i < 1073741824; i += granularity, ptr += granularity) {
+    for (uint64_t i = 0; i < 1073741824; i += granularity, ptr += granularity) {
 
         memcpy(ptr, buf, granularity);
         pmem_persist(ptr, granularity);
