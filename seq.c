@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
     declare_timer
     start_timer
 
-    for (int i = 0; i < NUM_THREADS; i++) {
+    for (uint64_t i = 0; i < NUM_THREADS; i++) {
         pthread_create(threads + i, NULL, thread, map + i * 1073741824);
     }
 
