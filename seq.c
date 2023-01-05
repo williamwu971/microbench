@@ -5,7 +5,7 @@
 #include "microbench.h"
 
 int GNL = 0;
-#define NUM_THREADS 19
+//#define NUM_THREADS 19
 
 int log_start_perf() {
 
@@ -104,15 +104,16 @@ void *thread(void *arg) {
 
 int main(int argc, char **argv) {
 
-    if (argc != 2)return 1;
+    if (argc != 3)return 1;
     GNL = atoi(argv[1]);
+    int NUM_THREADS = atoi(argv[2]);
 
     size_t mapped_len;
     int is_pmem;
-    char *map = pmem_map_file("/pmem0/microbench", 20401094656,
+    char *map = pmem_map_file("/pmem0/microbench", NUM_THREADS * 1073741824,
                               PMEM_FILE_CREATE | PMEM_FILE_EXCL,
                               00666, &mapped_len, &is_pmem);
-    if (!is_pmem)
+    if (!is_pmem || mapped_len != NUM_THREADS * 1073741824)
         die("File is not in pmem?!");
 
     /* Find size */

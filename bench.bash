@@ -2,10 +2,13 @@
 
 total_sizes=($(seq 48 16 1024))
 gcc seq.c -pthread -lpmem || exit
+T=6
+
+echo "T=$T," >>seq.csv
 
 for t in "${total_sizes[@]}"; do
   rm -rf /pmem0/*
-  ./a.out "$t"
+  ./a.out "$t" $T
 done
 
 #/mnt/sdb/xiaoxiang/linux/tools/perf stat -e \
