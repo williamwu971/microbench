@@ -2,9 +2,9 @@
 
 total_sizes=($(seq 48 16 1024))
 gcc seq.c -pthread -lpmem || exit
-T=6
+T=19
 
-echo "T=$T," >>seq.csv
+echo "T=$T," >seq.csv
 echo "granularity,read(GB),read(GB/s),write(GB),write(GB/s),elapsed(s)" >>seq.csv
 
 for t in "${total_sizes[@]}"; do
