@@ -8,7 +8,7 @@ echo "T=$T," >>seq.csv
 
 for t in "${total_sizes[@]}"; do
   rm -rf /pmem0/*
-  ./a.out "$t" $T
+  taskset -c 0-$T ./a.out "$t" $T
 done
 
 #/mnt/sdb/xiaoxiang/linux/tools/perf stat -e \
