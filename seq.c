@@ -140,6 +140,7 @@ int main(int argc, char **argv) {
     printf("factor: %lu\n", factor);
 
     locations_len = 1073741824 / factor;
+    locations = malloc(sizeof(uint64_t) * locations_len);
     for (uint64_t i = 0; i < locations_len; i++) {
         locations[i] = i * 256;
     }
