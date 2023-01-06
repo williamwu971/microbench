@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 total_sizes=($(seq 48 16 1024))
-gcc seq.c -pthread -lpmem || exit
+gcc seq.c -ggdb3 -pthread -lpmem || exit
 T=19
 
 echo "T=$T," >seq.csv
