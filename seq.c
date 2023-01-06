@@ -5,6 +5,8 @@
 #include "microbench.h"
 
 int GNL = 0;
+uint64_t *locations = NULL;
+uint64_t locations_len = 0;
 //#define NUM_THREADS 19
 
 int log_start_perf() {
@@ -94,10 +96,16 @@ void *thread(void *arg) {
     void *buf = malloc(granularity);
     memset(buf, 0xdeadbeef, granularity);
 
-    for (uint64_t i = 0; i < 1073741824 - granularity; i += granularity, ptr += granularity) {
+//    for (uint64_t i = 0; i < 1073741824 - granularity; i += granularity, ptr += granularity) {
+//
+//        memcpy(ptr, buf, granularity);
+//        pmem_persist(ptr, granularity);
+//    }
 
-        memcpy(ptr, buf, granularity);
-        pmem_persist(ptr, granularity);
+    for (uint64_t i = 0; i < locations_len; i++) {
+
+        memcpy(ptr + locations[i], buf, granularity);
+        pmem_persist(ptr + locations[i], granularity);
     }
 
 
@@ -124,6 +132,25 @@ int main(int argc, char **argv) {
 
     for (size_t i = 0; i < mapped_len; i += 4096) {
         map[i] = 0;
+    }
+
+    uint64_t factor = GNL / 256;
+    if (GNL % 256 != 0) factor++;
+    factor *= 256;
+    printf("factor: %lu\n", factor);
+
+    locations_len = 1073741824 / factor;
+    for (uint64_t i = 0; i < locations_len; i++) {
+        locations[i] = i * 256;
+    }
+
+    srand(time(NULL));
+
+    for (uint64_t i = 0; i < locations_len - 1; i++) {
+        uint64_t j = i + rand() / (RAND_MAX / (locations_len - i) + 1);
+        uint64_t t = locations[j];
+        locations[j] = locations[i];
+        locations[i] = t;
     }
 
 
